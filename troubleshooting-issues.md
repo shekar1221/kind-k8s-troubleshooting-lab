@@ -1,10 +1,13 @@
+```bash
 $ kubectl get pods -o wide
 NAME                              READY   STATUS             RESTARTS      AGE   IP           NODE
        NOMINATED NODE   READINESS GATES
 crashloop-demo-54df756f67-2hfj8   0/1     CrashLoopBackOff   8 (81s ago)   17m   10.244.2.5   troubleshooting-worker    <none>           <none>
 imagepull-demo-54f7dc4749-68nnx   0/1     ImagePullBackOff   0             18m   10.244.1.6   troubleshooting-worker2   <none>           <none>
 netshoot                          1/1     Running            1 (33m ago)   94m   10.244.2.3   troubleshooting-worker    <none>           <none>
+```
 
+```bash
 ##crashloop-demo ###
 
 $ kubectl get events -n troubleshooting-lab --field-selector involvedObject.name=crashloop-demo-54df756f67-2hfj8
@@ -16,7 +19,8 @@ LAST SEEN   TYPE      REASON      OBJECT                                MESSAGE
 58s         Normal    Started     pod/crashloop-demo-54df756f67-2hfj8   Container started
 58s         Normal    Pulled      pod/crashloop-demo-54df756f67-2hfj8   Container image "busybox:1.36" already present on machine and can be accessed by the pod
 55s         Warning   BackOff     pod/crashloop-demo-54df756f67-2hfj8   Back-off restarting failed container app in pod crashloop-demo-54df756f67-2hfj8_troubleshooting-lab(78952438-6fd6-4263-a393-e2e3e67df1b8)
-
+```
+```bash
 shekk@Shekkar MINGW64 /d/kind-k8s-troubleshooting-lab/scenarios/pods (main)
 $
 
@@ -90,9 +94,11 @@ Events:
   Normal   Started    18s (x9 over 16m)   kubelet            spec.containers{app}: Container started
   Normal   Pulled     18s (x8 over 16m)   kubelet            spec.containers{app}: Container image "busybox:1.36" already present on machine and can be accessed by the pod
   Warning  BackOff    15s (x16 over 16m)  kubelet            spec.containers{app}: Back-off restarting failed container app in pod crashloop-demo-54df756f67-2hfj8_troubleshooting-lab(78952438-6fd6-4263-a393-e2e3e67df1b8)
-
+```
 
 ##### fixed crashloop-demo  issue with command echo "Simulating app startup failure"; sleep 2; exit 1### 
+
+```bash
  kubectl get pods
 NAME                                   READY   STATUS                       RESTARTS      AGE
 crashloop-demo-f7ff486fb-xcwrs         1/1     Running                      0             4m4s
@@ -159,10 +165,11 @@ Events:
   Normal  Pulled     2m21s  kubelet            spec.containers{app}: Successfully pulled image "busybox:1.36" in 6.776s (6.776s including waiting). Image size: 2217006 bytes.
   Normal  Created    2m21s  kubelet            spec.containers{app}: Container created
   Normal  Started    2m21s  kubelet            spec.containers{app}: Container started
-
+```
 
 ### ImagePullBackOff  ###
 
+```bash
 $ kubectl describe pod imagepull-demo-54f7dc4749-68nnx |tail
                              node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
 Events:
@@ -187,8 +194,10 @@ LAST SEEN   TYPE      REASON      OBJECT                                MESSAGE
 
 shekk@Shekkar MINGW64 /d/kind-k8s-troubleshooting-lab/scenarios/pods (main)
 $
+```
 
 #### fixed ImagePullBackOff  wrongly passed image name ###
+```bash
 $ kubectl get pods
 NAME                                   READY   STATUS                       RESTARTS      AGE
 crashloop-demo-f7ff486fb-xcwrs         1/1     Running                      0             5m51s
@@ -206,9 +215,10 @@ Events:
   Normal  Pulled     5m35s  kubelet            spec.containers{app}: Container image "nginx:1.27-alpine" already present on machine and can be accessed by the pod
   Normal  Created    5m35s  kubelet            spec.containers{app}: Container created
   Normal  Started    5m35s  kubelet            spec.containers{app}: Container started
-
+```
 ### config container error missing --  Environment:          <none> ###
 
+```bash
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -387,12 +397,12 @@ Events:
   Normal   Scheduled  17m                   default-scheduler  Successfully assigned troubleshooting-lab/missing-config-demo-6f7b87d4c9-r7cmg to troubleshooting-worker
   Normal   Pulled     7m27s (x49 over 17m)  kubelet            spec.containers{app}: Container image "busybox:1.36" already present on machine and can be accessed by the pod
   Warning  Failed     7m27s (x49 over 17m)  kubelet            spec.containers{app}: Error: configmap "app-runtime-config" not found
-
+```
 
 
 
 #####  READINESS probe failed with 404 ####
-
+```bash
 $ kubectl get deployments readiness-demo
 NAME             READY   UP-TO-DATE   AVAILABLE   AGE
 readiness-demo   0/2     2            0           6m3s
@@ -404,9 +414,9 @@ readiness-demo-84ffb7f8-jh9r7          0/1     Running   0             6m22s
 
 shekk@Shekkar MINGW64 /d/kind-k8s-troubleshooting-lab/scenarios/pods/03-createcontainerconfigerror (main)
 $
-
+```
 ##### fixed readiness-demo  *** 
-
+```bash
 $ kubectl describe deployment.apps/readiness-demo
 Name:                   readiness-demo
 Namespace:              troubleshooting-lab
@@ -446,9 +456,6 @@ Events:
   Normal  ScalingReplicaSet  18s    deployment-controller  Scaled down replica set readiness-demo-84ffb7f8 from 2 to 1
   Normal  ScalingReplicaSet  18s    deployment-controller  Scaled up replica set readiness-demo-5cbcd47557 from 1 to 2
   Normal  ScalingReplicaSet  12s    deployment-controller  Scaled down replica set readiness-demo-84ffb7f8 from 1 to 0
-
-
-
 
 $ kubectl get events -n troubleshooting-lab --field-selector involvedObject.name=readiness-demo-84ffb7f8-jh9r7
 LAST SEEN   TYPE      REASON      OBJECT                              MESSAGE
@@ -533,4 +540,4 @@ LAST SEEN   TYPE     REASON              OBJECT                      MESSAGE
 3m16s       Normal   ScalingReplicaSet   deployment/readiness-demo   Scaled down replica set readiness-demo-84ffb7f8 from 2 to 1
 3m16s       Normal   ScalingReplicaSet   deployment/readiness-demo   Scaled up replica set readiness-demo-5cbcd47557 from 1 to 2
 3m10s       Normal   ScalingReplicaSet   deployment/readiness-demo   Scaled down replica set readiness-demo-84ffb7f8 from 1 to 0
-
+```

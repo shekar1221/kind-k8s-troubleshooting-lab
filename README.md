@@ -67,6 +67,28 @@ Validate service connectivity:
 
 ```bash
 kubectl exec -n troubleshooting-lab netshoot -- curl -s http://orders-api.troubleshooting-lab.svc.cluster.local
+ 
+
+
+PS D:\kind-k8s-troubleshooting-lab> kubectl get svc -n troubleshooting-lab
+NAME         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+orders-api   ClusterIP   10.96.93.164   <none>        80/TCP    13m
+
+### used port-ward to check its working
+kubectl port-forward svc/orders-api 8080:80 -n troubleshooting-lab
+
+http://localhost:8080/  its working 
+
+PS D:\kind-k8s-troubleshooting-lab> kubectl get endpoints orders-api -n troubleshooting-lab
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+NAME         ENDPOINTS                     AGE
+orders-api   10.244.1.2:80,10.244.2.2:80   28m
+PS D:\kind-k8s-troubleshooting-lab> kubectl get pods -n troubleshooting-lab --show-labels -o wide
+NAME                          READY   STATUS    RESTARTS   AGE   IP           NODE                      NOMINATED NODE   READINESS GATES   LABELS
+netshoot                      1/1     Running   0          28m   10.244.2.3   troubleshooting-worker    <none>           <none>            app=netshoot
+orders-api-59fff47745-5kkkt   1/1     Running   0          28m   10.244.2.2   troubleshooting-worker    <none>           <none>            app=orders-api,pod-template-hash=59fff47745
+orders-api-59fff47745-sq6fz   1/1     Running   0          28m   10.244.1.2   troubleshooting-worker2   <none>           <none>            app=orders-api,pod-template-hash=59fff47745
+PS D:\kind-k8s-troubleshooting-lab>
 ```
 
 ## How To Run Each Scenario
@@ -80,6 +102,20 @@ Run the broken file first:
 
 ```bash
 kubectl apply -f scenarios/<category>/<scenario>/broken.yaml
+
+changing context to troubleshooting-lab
+PS D:\kind-k8s-troubleshooting-lab> kubectl config set-context --current -n=troubleshooting-lab
+Context "kind-troubleshooting" modified.
+PS D:\kind-k8s-troubleshooting-lab> kubectl config current-context
+kind-troubleshooting
+PS D:\kind-k8s-troubleshooting-lab> kubectl get pods
+NAME                              READY   STATUS             RESTARTS   AGE
+imagepull-demo-54f7dc4749-2khsj   0/1     ImagePullBackOff   0          30m
+netshoot                          1/1     Running            0          60m
+orders-api-59fff47745-5kkkt       1/1     Running            0          60m
+orders-api-59fff47745-sq6fz       1/1     Running            0          60m
+PS D:\kind-k8s-troubleshooting-lab>
+
 ```
 
 Troubleshoot:

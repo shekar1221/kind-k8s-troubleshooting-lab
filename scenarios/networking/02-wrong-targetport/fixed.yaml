@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: targetport-api
+  namespace: troubleshooting-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: targetport-api
+  template:
+    metadata:
+      labels:
+        app: targetport-api
+    spec:
+      containers:
+        - name: app
+          image: python:3.12-alpine
+          command: ["python", "-m", "http.server", "8080"]
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: targetport-api
+  namespace: troubleshooting-lab
+spec:
+  selector:
+    app: targetport-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+

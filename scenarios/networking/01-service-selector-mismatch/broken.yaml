@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: selector-backend
+  namespace: troubleshooting-lab
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: selector-backend
+  template:
+    metadata:
+      labels:
+        app: selector-backend
+    spec:
+      containers:
+        - name: app
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: selector-backend
+  namespace: troubleshooting-lab
+spec:
+  selector:
+    app: selector-backend-wrong
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+

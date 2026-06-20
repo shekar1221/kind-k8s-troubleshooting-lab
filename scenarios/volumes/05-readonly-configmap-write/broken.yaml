@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: readonly-config
+  namespace: troubleshooting-lab
+data:
+  app.properties: |
+    mode=readonly
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: readonly-write-demo
+  namespace: troubleshooting-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: readonly-write-demo
+  template:
+    metadata:
+      labels:
+        app: readonly-write-demo
+    spec:
+      containers:
+        - name: app
+          image: busybox:1.36
+          command: ["sh", "-c"]
+          args:
+            - echo "new value" >> /etc/app/app.properties && sleep 3600
+          volumeMounts:
+            - name: readonly-config
+              mountPath: /etc/app
+      volumes:
+        - name: readonly-config
+          configMap:
+            name: readonly-config

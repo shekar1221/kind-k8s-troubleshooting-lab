@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hostpath-demo
+  namespace: troubleshooting-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hostpath-demo
+  template:
+    metadata:
+      labels:
+        app: hostpath-demo
+    spec:
+      containers:
+        - name: app
+          image: busybox:1.36
+          command: ["sh", "-c", "echo hostpath-mounted > /host-logs/status.txt; cat /host-logs/status.txt; sleep 3600"]
+          volumeMounts:
+            - name: host-logs
+              mountPath: /host-logs
+      volumes:
+        - name: host-logs
+          hostPath:
+            path: /tmp/kind-hostpath-demo
+            type: DirectoryOrCreate
+

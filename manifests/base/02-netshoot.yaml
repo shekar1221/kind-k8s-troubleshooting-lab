@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: netshoot
+  namespace: troubleshooting-lab
+  labels:
+    app: netshoot
+spec:
+  containers:
+    - name: netshoot
+      image: nicolaka/netshoot:latest
+      command: ["sleep", "3600"]
+

@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: missing-config-demo
+  namespace: troubleshooting-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: missing-config-demo
+  template:
+    metadata:
+      labels:
+        app: missing-config-demo
+    spec:
+      containers:
+        - name: app
+          image: busybox:1.36
+          command: ["sh", "-c", "env && sleep 3600"]
+          envFrom:
+            - configMapRef:
+                name: app-runtime-config
+

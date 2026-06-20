@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: readiness-demo
+  namespace: troubleshooting-lab
+spec:
+  replicas: 2
+  progressDeadlineSeconds: 45
+  selector:
+    matchLabels:
+      app: readiness-demo
+  template:
+    metadata:
+      labels:
+        app: readiness-demo
+    spec:
+      containers:
+        - name: app
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /missing-health-page
+              port: 80
+            initialDelaySeconds: 3
+            periodSeconds: 5
+

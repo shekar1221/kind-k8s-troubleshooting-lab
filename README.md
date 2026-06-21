@@ -130,6 +130,12 @@ kubectl get events -n troubleshooting-lab --sort-by='.lastTimestamp'
 Apply the fix:
 
 ```bash
+PS D:\kind-k8s-troubleshooting-lab> kubectl config set-context --current --namespace=troubleshooting-lab
+Context "kind-troubleshooting" modified
+PS D:\kind-k8s-troubleshooting-lab> kubectl config get-contexts 
+PS D:\kind-k8s-troubleshooting-lab> kubectl config current-context
+kind-troubleshooting
+
 kubectl apply -f scenarios/<category>/<scenario>/fixed.yaml
 ```
 

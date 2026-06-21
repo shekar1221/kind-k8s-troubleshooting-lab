@@ -24,6 +24,11 @@ docker version
 kind version
 kubectl version --client
 
+kubectl config get-contexts
+kubectl config current-context
+kubectl config set-context --current --namespace=troubleshooting-lab
+kubectl get pods
+
 docker not running started by below command
 PS C:\WINDOWS\system32> Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"
   or

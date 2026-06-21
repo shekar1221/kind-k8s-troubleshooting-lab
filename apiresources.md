@@ -1,3 +1,16 @@
+		
+		
+		
+
+| Value | Meaning | Linux/Real-life example |
+|---|---|---|
+| true | `Resource belongs to one namespace `| Like a file inside one folder |
+| false | `Resource belongs to whole cluster` | Like disk/OS setting for whole server |
+
+kubectl get api-resources, the column NAMESPACED means whether that Kubernetes object lives inside a namespace or at cluster level.
+
+```bash
+
 PS D:\kind-k8s-troubleshooting-lab\scenarios\init-containers\01-init-waiting-for-service> kubectl api-resources
 NAME                                SHORTNAMES   APIVERSION                        NAMESPACED   KIND
 bindings                                         v1                                true         Binding
@@ -67,3 +80,4 @@ csistoragecapacities                             storage.k8s.io/v1              
 storageclasses                      sc           storage.k8s.io/v1                 false        StorageClass
 volumeattachments                                storage.k8s.io/v1                 false        VolumeAttachment
 volumeattributesclasses             vac          storage.k8s.io/v1                 false        VolumeAttributesClass
+```

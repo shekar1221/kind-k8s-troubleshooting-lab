@@ -34,6 +34,24 @@ Validate:
 docker version
 kind version
 kubectl version --client
+<<<<<<< HEAD
+=======
+
+kubectl config get-contexts
+kubectl config current-context
+kubectl config set-context --current --namespace=troubleshooting-lab
+kubectl get pods
+
+docker not running started by below command
+PS C:\WINDOWS\system32> Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"
+  or
+PS C:\WINDOWS\system32> Start-Service com.docker.service
+PS C:\WINDOWS\system32> Get-Service com.docker.service
+
+Status   Name               DisplayName
+------   ----               -----------
+Running  com.docker.service Docker Desktop Service
+>>>>>>> e5866f6f22980de78ab2e84579bf2ea89627cd9d
 ```
 
 ## Create The Kind Cluster

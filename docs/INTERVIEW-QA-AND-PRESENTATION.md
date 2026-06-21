@@ -16,7 +16,7 @@ Use this structure:
 
 Short format:
 
-```bash
+```
 We observed [symptom]. I checked [events/logs/rollout/endpoints/PVC].
 The root cause was [exact issue]. We fixed it by [fix].
 To prevent recurrence, we added [alert/check/pipeline validation/runbook].

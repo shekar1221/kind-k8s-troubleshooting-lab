@@ -25,6 +25,8 @@ kind version
 kubectl version --client
 
 docker not running started by below command
+PS C:\WINDOWS\system32> Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"
+  or
 PS C:\WINDOWS\system32> Start-Service com.docker.service
 PS C:\WINDOWS\system32> Get-Service com.docker.service
 

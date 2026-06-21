@@ -1,4 +1,5 @@
 want to change branch pointing from master to main and to delete master branch 
+
 ```bash
 $ git branch -a
 * main
@@ -7,7 +8,7 @@ $ git branch -a
   remotes/origin/main
   remotes/origin/master
   remotes/origin/uat1
-```bash
+```
 
 changed  default branch in GitHub in github web 
 
@@ -24,14 +25,12 @@ $ git log --oneline --all --graph --decorate
 * 2aff1ca (origin/uat1, origin/dev1) m1
 * 0c87d55 07decfile
 ```
+modified to main one 
 
 ```bash
 shekk@Shekkar MINGW64 /d/kind-k8s-troubleshooting-lab (main)
 $ git remote set-head origin main
-```bash
 
-modified to main one 
-```bash
 shekk@Shekkar MINGW64 /d/kind-k8s-troubleshooting-lab (main)
 $ git branch -a
 * main

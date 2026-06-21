@@ -9,6 +9,17 @@ This project creates a local Kubernetes troubleshooting lab using Kind with:
 
 The goal is to practice how to identify, explain, and fix failures in pods, deployments, services, init containers, volumes, PVCs, and scheduling.
 
+## Documentation Map
+
+| File | Purpose |
+|---|---|
+| `docs/TEST-SCENARIOS-WITH-COMMANDS.md` | Step-by-step test commands for each failure and fix |
+| `docs/TROUBLESHOOTING-STEPS.md` | Troubleshooting workflow by scenario |
+| `docs/VOLUMES-LAB.md` | Dedicated Kubernetes volumes practice guide |
+| `docs/SCENARIO-CHEAT-TABLE.md` | Quick table of symptoms, causes, and fixes |
+| `docs/INTERVIEW-QA-AND-PRESENTATION.md` | Interview answers and production story format |
+| `scripts/health_check.py` | Python service health checker |
+
 ## Prerequisites
 
 Install these tools on your laptop:
@@ -23,16 +34,6 @@ Validate:
 docker version
 kind version
 kubectl version --client
-
-docker not running started by below command
-PS C:\WINDOWS\system32> Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"
-  or
-PS C:\WINDOWS\system32> Start-Service com.docker.service
-PS C:\WINDOWS\system32> Get-Service com.docker.service
-
-Status   Name               DisplayName
-------   ----               -----------
-Running  com.docker.service Docker Desktop Service
 ```
 
 ## Create The Kind Cluster
@@ -69,28 +70,18 @@ Validate service connectivity:
 
 ```bash
 kubectl exec -n troubleshooting-lab netshoot -- curl -s http://orders-api.troubleshooting-lab.svc.cluster.local
- 
+```
 
+Run Python health check from inside the cluster:
 
-PS D:\kind-k8s-troubleshooting-lab> kubectl get svc -n troubleshooting-lab
-NAME         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
-orders-api   ClusterIP   10.96.93.164   <none>        80/TCP    13m
+```bash
+kubectl exec -n troubleshooting-lab health-checker -- python /scripts/health_check.py
+```
 
-### used port-ward to check its working
-kubectl port-forward svc/orders-api 8080:80 -n troubleshooting-lab
+Run Python health check from your laptop for localhost/NodePort:
 
-http://localhost:8080/  its working 
-
-PS D:\kind-k8s-troubleshooting-lab> kubectl get endpoints orders-api -n troubleshooting-lab
-Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
-NAME         ENDPOINTS                     AGE
-orders-api   10.244.1.2:80,10.244.2.2:80   28m
-PS D:\kind-k8s-troubleshooting-lab> kubectl get pods -n troubleshooting-lab --show-labels -o wide
-NAME                          READY   STATUS    RESTARTS   AGE   IP           NODE                      NOMINATED NODE   READINESS GATES   LABELS
-netshoot                      1/1     Running   0          28m   10.244.2.3   troubleshooting-worker    <none>           <none>            app=netshoot
-orders-api-59fff47745-5kkkt   1/1     Running   0          28m   10.244.2.2   troubleshooting-worker    <none>           <none>            app=orders-api,pod-template-hash=59fff47745
-orders-api-59fff47745-sq6fz   1/1     Running   0          28m   10.244.1.2   troubleshooting-worker2   <none>           <none>            app=orders-api,pod-template-hash=59fff47745
-PS D:\kind-k8s-troubleshooting-lab>
+```bash
+python scripts/health_check.py --target local-orders-api:localhost:8080:/
 ```
 
 ## How To Run Each Scenario
@@ -104,20 +95,6 @@ Run the broken file first:
 
 ```bash
 kubectl apply -f scenarios/<category>/<scenario>/broken.yaml
-
-changing context to troubleshooting-lab
-PS D:\kind-k8s-troubleshooting-lab> kubectl config set-context --current -n=troubleshooting-lab
-Context "kind-troubleshooting" modified.
-PS D:\kind-k8s-troubleshooting-lab> kubectl config current-context
-kind-troubleshooting
-PS D:\kind-k8s-troubleshooting-lab> kubectl get pods
-NAME                              READY   STATUS             RESTARTS   AGE
-imagepull-demo-54f7dc4749-2khsj   0/1     ImagePullBackOff   0          30m
-netshoot                          1/1     Running            0          60m
-orders-api-59fff47745-5kkkt       1/1     Running            0          60m
-orders-api-59fff47745-sq6fz       1/1     Running            0          60m
-PS D:\kind-k8s-troubleshooting-lab>
-
 ```
 
 Troubleshoot:
@@ -132,12 +109,6 @@ kubectl get events -n troubleshooting-lab --sort-by='.lastTimestamp'
 Apply the fix:
 
 ```bash
-PS D:\kind-k8s-troubleshooting-lab> kubectl config set-context --current --namespace=troubleshooting-lab
-Context "kind-troubleshooting" modified
-PS D:\kind-k8s-troubleshooting-lab> kubectl config get-contexts 
-PS D:\kind-k8s-troubleshooting-lab> kubectl config current-context
-kind-troubleshooting
-
 kubectl apply -f scenarios/<category>/<scenario>/fixed.yaml
 ```
 
@@ -189,6 +160,14 @@ kind delete cluster --name troubleshooting
 | Volumes | `volumes/07-emptydir-data-loss` | emptyDir data disappears when pod is recreated |
 | Scheduling | `scheduling/01-node-selector-mismatch` | Pod requests a node label that does not exist |
 
+## Recommended Practice Order
+
+1. Read `docs/SCENARIO-CHEAT-TABLE.md`.
+2. Run `docs/TEST-SCENARIOS-WITH-COMMANDS.md` scenario by scenario.
+3. For storage practice, use `docs/VOLUMES-LAB.md`.
+4. After each fix, run the Python health check.
+5. Prepare interview stories using `docs/INTERVIEW-QA-AND-PRESENTATION.md`.
+
 ## Production Troubleshooting Flow
 
 Use this order during interview and incident calls:
@@ -216,4 +195,3 @@ kubectl get svc,endpoints -n troubleshooting-lab
 kubectl get cm,secret,pvc,pv -n troubleshooting-lab
 kubectl get events -n troubleshooting-lab --sort-by='.lastTimestamp'
 ```
-

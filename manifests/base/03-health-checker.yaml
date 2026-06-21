@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: health-check-script
+  namespace: troubleshooting-lab
+data:
+  health_check.py: |
+    #!/usr/bin/env python3
+    import http.client
+    import socket
+    import sys
+
+    TARGETS = [
+        ("orders-api", "orders-api.troubleshooting-lab.svc.cluster.local", 80, "/"),
+        ("selector-backend", "selector-backend.troubleshooting-lab.svc.cluster.local", 80, "/"),
+        ("targetport-api", "targetport-api.troubleshooting-lab.svc.cluster.local", 80, "/"),
+        ("payments-db", "payments-db.troubleshooting-lab.svc.cluster.local", 5432, None),
+    ]
+
+    def check_dns(host):
+        try:
+            records = socket.getaddrinfo(host, None)
+            return True, ", ".join(sorted({r[4][0] for r in records}))
+        except Exception as exc:
+            return False, str(exc)
+
+    def check_tcp(host, port):
+        try:
+            with socket.create_connection((host, port), timeout=3):
+                return True, "connected"
+        except Exception as exc:
+            return False, str(exc)
+
+    def check_http(host, port, path):
+        try:
+            conn = http.client.HTTPConnection(host, port, timeout=3)
+            conn.request("GET", path)
+            res = conn.getresponse()
+            res.read()
+            conn.close()
+            return 200 <= res.status < 400, f"HTTP {res.status}"
+        except Exception as exc:
+            return False, str(exc)
+
+    failed = 0
+    for name, host, port, path in TARGETS:
+        print(f"\n== {name} ==")
+        ok, detail = check_dns(host)
+        print(f"[{'PASS' if ok else 'FAIL'}] DNS {host}: {detail}")
+        if not ok:
+            failed += 1
+            continue
+        ok, detail = check_tcp(host, port)
+        print(f"[{'PASS' if ok else 'FAIL'}] TCP {host}:{port}: {detail}")
+        if not ok:
+            failed += 1
+            continue
+        if path:
+            ok, detail = check_http(host, port, path)
+            print(f"[{'PASS' if ok else 'FAIL'}] HTTP {host}{path}: {detail}")
+            if not ok:
+                failed += 1
+
+    print(f"\nchecked={len(TARGETS)} failed={failed}")
+    sys.exit(1 if failed else 0)
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: health-checker
+  namespace: troubleshooting-lab
+  labels:
+    app: health-checker
+spec:
+  containers:
+    - name: python
+      image: python:3.12-alpine
+      command: ["sleep", "3600"]
+      volumeMounts:
+        - name: script
+          mountPath: /scripts
+          readOnly: true
+  volumes:
+    - name: script
+      configMap:
+        name: health-check-script
+
